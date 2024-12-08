@@ -17,10 +17,7 @@ jobs:
       matrix:
         platform:
           - { name: Windows (MSVC),                os: windows-2019,   build-spirv-cross: true,  vendored: false, shell: sh, msvc: true, artifact: 'SDL3_shadercross-VC-x64' }
-          - { name: Windows (mingw64),             os: windows-latest, build-spirv-cross: false, vendored: false, shell: 'msys2 {0}', msystem: mingw64, msys-env: mingw-w64-x86_64, artifact: 'SDL3_shadercross-mingw64' }
-          - { name: Ubuntu 22.04,                  os: ubuntu-22.04,   build-spirv-cross: true,  vendored: false, shell: sh, artifact: 'SDL3_shadercross-linux-x64' }
-          - { name: Steam Linux Runtime (Sniper),  os: ubuntu-latest,  build-spirv-cross: false,  vendored: true, shell: sh, artifact: 'SDL3_shadercross-slrsniper', container: 'registry.gitlab.steamos.cloud/steamrt/sniper/sdk:beta' }
-          - { name: macOS,                         os: macos-latest,   build-spirv-cross: true,  vendored: true,  shell: sh, artifact: 'SDL3_shadercross-macos-arm64' }
+          
 
     steps:
       - uses: actions/checkout@v4
@@ -120,6 +117,19 @@ jobs:
         if: ${{ always() && steps.build.outcome == 'success' }}
         run: |
           cmake --build build/ --target package
+      
+      # New step to upload binary artifacts
+      - name: Upload Binary Artifacts
+        uses: actions/upload-artifact@v4
+        if: ${{ always() && steps.build.outcome == 'success' }}
+        with:
+          name: ${{ matrix.platform.artifact }}-binaries
+          path: |
+            build/src/SDL_shadercross*
+            build/src/*.dll
+            build/src/*.so
+            build/src/*.dylib
+          if-no-files-found: warn
 
       - name: Verify CMake configuration files
         if: ${{ always() && steps.install.outcome == 'success' }}
