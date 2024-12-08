@@ -124,11 +124,7 @@ jobs:
         if: ${{ always() && steps.build.outcome == 'success' }}
         with:
           name: ${{ matrix.platform.artifact }}-binaries
-          path: |
-            build/src/SDL_shadercross*
-            build/src/*.dll
-            build/src/*.so
-            build/src/*.dylib
+          path: build/
           if-no-files-found: warn
 
       - name: Verify CMake configuration files
